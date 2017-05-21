@@ -1,4 +1,4 @@
-package Voice;
+package voice;
 
 import java.awt.EventQueue;
 
@@ -19,8 +19,7 @@ import javax.swing.JPanel;
 import java.awt.SystemColor;
 import javax.swing.border.LineBorder;
 
-import Config.Config;
-import Ringtone.PlayRingtone;
+import config.Config;
 
 import java.awt.Toolkit;
 import java.awt.Window.Type;
@@ -56,7 +55,7 @@ public class Caller extends JFrame {
 		this.yourIP = yourIP;
 		initialize();
 		this.lbUser.setText(yourname);
-		
+
 	}
 
 	/**
@@ -124,7 +123,8 @@ public class Caller extends JFrame {
 					agreedState = true;
 					startRecoderAudio(true);
 					startPlayerAudio(true);
-					
+					btnCall.setVisible(false);
+					btnDeny.setLocation(70, 5);
 				}
 			}
 		});
@@ -146,10 +146,6 @@ public class Caller extends JFrame {
 		lbTime.setBounds(22, 59, 97, 25);
 		this.getContentPane().add(lbTime);
 	}
-
-	
-
-	
 
 	public void setVisibleFrameCall(boolean b) {
 		this.setVisible(b);
@@ -197,36 +193,23 @@ public class Caller extends JFrame {
 	}
 
 	public void startRecoderAudio(boolean state) {
-		if (state) {
-			agreedState = true;
 			r = new RecorderAudio(yourIP, Config.portUDPAudio);
 			r.start();
-		} else {
-			r.stop();
-		}
 	}
 
 	public void startPlayerAudio(boolean state) {
-		agreedState = true;
-		if (state) {
 			p = new PlayerAudio(Config.portUDPAudio);
 			p.start();
-		} else {
-			p.stop();
-		}
 	}
 
 	public void releaseMemory() {
 		try {
-			if (agreedState) {
-				r.stop();
-				p.stop();
-			}else{
-				startPlayRingtone(false);
-			}
+			r.closeSocket();
+			r.stop();
+			p.closeSocket();
+			p.stop();
 		} catch (Exception e) {
 		}
-		//setVisibleFrameCall(false);
 		dispose();
 	}
 }

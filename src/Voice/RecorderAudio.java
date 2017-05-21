@@ -1,4 +1,4 @@
-package Voice;
+package voice;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -50,6 +50,15 @@ public class RecorderAudio extends Thread {
 			}
 		}
 
+	}
+	
+	public void closeSocket(){
+		try{
+		audio_in.close();
+		dout.close();
+		}catch (Exception e) {
+			System.out.println("audio recorder close failed");
+		}
 	}
 	
 	public static AudioFormat getaudioformat() {

@@ -1,4 +1,4 @@
-package Voice;
+package voice;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -40,6 +40,11 @@ public class PlayerAudio extends Thread {
 		}
 	}
 
+	public void closeSocket(){
+		audio_out.close();
+		din.close();
+	}
+	
 	@Override
 	public void run() {
 		int i = 0;

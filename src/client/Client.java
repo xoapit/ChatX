@@ -464,7 +464,7 @@ public class Client {
 			public void actionPerformed(ActionEvent e) {
 				// calling to your account with IP address
 				if (yourAccount != null) {
-					VideoCall videoCall = new VideoCall(myAccount.getName(), yourAccount.getMyIP());
+					VideoCall videoCall = new VideoCall(yourAccount.getName(), yourAccount.getMyIP());
 					videoCall.startRecorderVideo();
 					videoCall.startPlayerVideo();
 					try {
@@ -556,7 +556,7 @@ public class Client {
 								User user = listModelUser.get(i);
 								if (user.getName().equals(senderName)
 										&& senderName.equals(myAccount.getName()) == false) {
-									VideoCall videoCall = new VideoCall(myAccount.getName(), user.getMyIP());
+									VideoCall videoCall = new VideoCall(user.getName(), user.getMyIP());
 									videoCall.playRingtone(true);
 								}
 							}

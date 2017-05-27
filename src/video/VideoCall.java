@@ -1,8 +1,5 @@
 package video;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Graphics;
 import java.awt.Image;
 
 import javax.swing.JFrame;
@@ -20,11 +17,8 @@ import voice.PlayerAudio;
 import voice.RecorderAudio;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import javax.swing.JButton;
 import javax.imageio.ImageIO;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -109,8 +103,7 @@ public class VideoCall extends JFrame {
 		DatagramSocket dout = null;
 
 		public void run() {
-			//initOpenCV();
-			int i = 0;
+			initOpenCV();
 			try {
 				dout = new DatagramSocket();
 			} catch (SocketException e) {
@@ -162,8 +155,7 @@ public class VideoCall extends JFrame {
 		contentPane.setLayout(null);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				if (agreedCalling)
-					playRingtone(false);
+				playRingtone(false);
 				releaseMemory();
 			}
 		});
@@ -184,8 +176,7 @@ public class VideoCall extends JFrame {
 		btnDeny.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				if (agreedCalling)
-					playRingtone(false);
+				playRingtone(false);
 				releaseMemory();
 			}
 		});
@@ -204,8 +195,9 @@ public class VideoCall extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				agreedCalling = true;
 				startRecorderVideo();
-				playRingtone(false);
 				startPlayerVideo();
+				playRingtone(false);
+				
 			}
 		});
 
@@ -220,7 +212,7 @@ public class VideoCall extends JFrame {
 		contentPane.add(panelVideo);
 		panelVideo.setLayout(null);
 		panelVideo.setFocusable(true);
-		this.setTitle("Video Call - " + yourName + " contacting...");
+		this.setTitle("Video Call with " + yourName);
 		this.show();
 	}
 
@@ -245,19 +237,19 @@ public class VideoCall extends JFrame {
 		try {
 			recorderVideo.stop();
 			camera.release();
-			
+
 			recorderAudio.closeSocket();
 			playerAudio.closeSocket();
-			
+
 			recorderAudio.stop();
 			playerAudio.stop();
-			
+
 			playerVideo.closeSocket();
 			playerVideo.stop();
 		} catch (Exception e) {
 			System.out.println("memory exception");
 		} finally {
-			
+
 		}
 		dispose();
 	}
@@ -287,8 +279,14 @@ public class VideoCall extends JFrame {
 			playRingtone = new PlayRingtone();
 			playRingtone.start();
 		} else {
-			playRingtone.interrupt();
-			playRingtone.stop();
+			try {
+				if (!playRingtone.isInterrupted() || playRingtone.isAlive()) {
+					playRingtone.interrupt();
+					playRingtone.stop();
+				}
+			} catch (Exception e) {
+
+			}
 		}
 	}
 

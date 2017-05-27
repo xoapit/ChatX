@@ -68,12 +68,7 @@ public class Server {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		try {
-			Server window = new Server();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		Server window = new Server();
 	}
 
 	/**

@@ -50,20 +50,23 @@ public class PlayerAudio extends Thread {
 		int i = 0;
 		incoming = new DatagramPacket(buffer, buffer.length);
 		while (true) {
-			try {
+			try {			
+				incoming = new DatagramPacket(buffer, buffer.length);
 				String myIP = Inet4Address.getLocalHost().getHostAddress();
 				din.receive(incoming);
-				if ((incoming.getAddress().getHostAddress().equals(myIP) == false)) {
+				
+				if (!incoming.getAddress().getHostAddress().contains(myIP)) {
+					buffer= new byte[512];
 					buffer = incoming.getData();
 					audio_out.write(buffer, 0, buffer.length);
-					System.out.println("#" + i++);
+					//System.out.println("#" + i++);
 				}
 			} catch (IOException ex) {
 			}
 		}
 	}
 	
-	public static AudioFormat getaudioformat() {
+	public AudioFormat getaudioformat() {
 		float sampleRate = 8000.0F;
 		int sampleSizeInbits = 16;
 		int channel = 2;

@@ -87,13 +87,13 @@ public class Client {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		try {
-			Login login = new Login();
-		} catch (Exception e) {
-			// e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args) {
+//		try {
+//			Login login = new Login();
+//		} catch (Exception e) {
+//			// e.printStackTrace();
+//		}
+//	}
 
 	/**
 	 * Create the application.
@@ -338,6 +338,7 @@ public class Client {
 				} catch (Exception e1) {
 					System.out.println(e1.getMessage());
 				}
+				txtChat.setText("");
 			}
 		});
 
@@ -390,6 +391,7 @@ public class Client {
 							System.out.println(e1.getMessage());
 						}
 					}
+					txtChat.setText("");
 				}
 			}
 		});

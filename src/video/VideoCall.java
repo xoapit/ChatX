@@ -1,4 +1,5 @@
 package video;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Graphics;
@@ -38,6 +39,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
@@ -59,15 +61,7 @@ public class VideoCall extends JFrame {
 	private RecorderAudio recorderAudio;
 	private PlayerAudio playerAudio;
 	private PlayRingtone playRingtone;
-	private boolean agreedCalling= false;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		VideoCall frame = new VideoCall("Xoapit","192.168.1.12");
-	}
-	
+	private boolean agreedCalling = false;
 
 	public class PlayerVideo extends Thread {
 		public DatagramSocket din = null;
@@ -84,24 +78,22 @@ public class VideoCall extends JFrame {
 
 		@Override
 		public void run() {
-			int i = 0;
 			packet = new DatagramPacket(buffer, buffer.length);
 			while (true) {
 				try {
-					String myIP = Inet4Address.getLocalHost().getHostAddress();
 					din.receive(packet);
 					byte[] buffer_img = packet.getData();
 
 					BufferedImage img = ImageIO.read(new ByteArrayInputStream(buffer_img));
 
 					displayImage(img);
-					System.out.println("V#" + i++);
+					// System.out.println("V#" + i++);
 				} catch (IOException ex) {
 				}
 			}
 		}
-		
-		public void closeSocket(){
+
+		public void closeSocket() {
 			din.close();
 		}
 
@@ -117,6 +109,7 @@ public class VideoCall extends JFrame {
 		DatagramSocket dout = null;
 
 		public void run() {
+			//initOpenCV();
 			int i = 0;
 			try {
 				dout = new DatagramSocket();
@@ -147,19 +140,19 @@ public class VideoCall extends JFrame {
 
 							DatagramPacket data = new DatagramPacket(byte_arr, byte_arr.length,
 									InetAddress.getByName(yourIP), Config.portUDPVideo);
-							System.out.println("Send V#" + i++);
+							// System.out.println("Send V#" + i++);
 							dout.send(data);
 						}
 					} catch (Exception ex) {
 
-					}					
-				}				
+					}
+				}
 			}
 		}
 	}
 
 	public VideoCall(String yourName, String yourIP) {
-		this.yourIP=yourIP;
+		this.yourIP = yourIP;
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VideoCall.class.getResource("/image/iconVideo.png")));
 		setResizable(false);
 		setTitle("Video Call");
@@ -169,7 +162,8 @@ public class VideoCall extends JFrame {
 		contentPane.setLayout(null);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				if(agreedCalling) playRingtone(false);
+				if (agreedCalling)
+					playRingtone(false);
 				releaseMemory();
 			}
 		});
@@ -190,7 +184,8 @@ public class VideoCall extends JFrame {
 		btnDeny.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				if(agreedCalling) playRingtone(false);
+				if (agreedCalling)
+					playRingtone(false);
 				releaseMemory();
 			}
 		});
@@ -207,10 +202,10 @@ public class VideoCall extends JFrame {
 		btnCall.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				agreedCalling=true;
+				agreedCalling = true;
 				startRecorderVideo();
 				playRingtone(false);
-				startPlayerVideo();				
+				startPlayerVideo();
 			}
 		});
 
@@ -225,39 +220,44 @@ public class VideoCall extends JFrame {
 		contentPane.add(panelVideo);
 		panelVideo.setLayout(null);
 		panelVideo.setFocusable(true);
-		this.setTitle("Video Call - "+yourName+" contacting...");
-		this.show();	
+		this.setTitle("Video Call - " + yourName + " contacting...");
+		this.show();
 	}
 
 	public void startPlayerVideo() {
 		playerVideo = new PlayerVideo();
 		playerVideo.start();
-		playerAudio= new PlayerAudio(Config.portUDPAudio);
+		playerAudio = new PlayerAudio(Config.portUDPAudio);
 		playerAudio.start();
-		
+
 		btnCall.setVisible(false);
 		btnDeny.setBounds(300, 382, 89, 71);
 	}
-	
-	public void startRecorderVideo(){
-		recorderVideo= new RecorderVideo();
+
+	public void startRecorderVideo() {
+		recorderVideo = new RecorderVideo();
 		recorderVideo.start();
-		recorderAudio= new RecorderAudio(yourIP, Config.portUDPAudio);
+		recorderAudio = new RecorderAudio(yourIP, Config.portUDPAudio);
 		recorderAudio.start();
 	}
 
 	public void releaseMemory() {
 		try {
 			recorderVideo.stop();
-			recorderAudio.stop();
-			
 			camera.release();
+			
+			recorderAudio.closeSocket();
+			playerAudio.closeSocket();
+			
+			recorderAudio.stop();
+			playerAudio.stop();
+			
 			playerVideo.closeSocket();
 			playerVideo.stop();
-			playerAudio.closeSocket();
-			playerAudio.stop();
 		} catch (Exception e) {
-
+			System.out.println("memory exception");
+		} finally {
+			
 		}
 		dispose();
 	}
@@ -281,13 +281,42 @@ public class VideoCall extends JFrame {
 		frame.get(0, 0, data);
 		return image;
 	}
-	
-	public void playRingtone(boolean state){
-		if(state){
-			playRingtone= new PlayRingtone();
+
+	public void playRingtone(boolean state) {
+		if (state) {
+			playRingtone = new PlayRingtone();
 			playRingtone.start();
-		}else{
+		} else {
+			playRingtone.interrupt();
 			playRingtone.stop();
 		}
 	}
+
+	public static void initOpenCV() {
+
+		setLibraryPath();
+
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+
+		System.out.println("OpenCV loaded. Version: " + Core.VERSION);
+
+	}
+
+	private static void setLibraryPath() {
+
+		try {
+
+			System.setProperty("java.library.path", "lib/x64");
+
+			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+			fieldSysPath.setAccessible(true);
+			fieldSysPath.set(null, null);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+
+	}
+
 }

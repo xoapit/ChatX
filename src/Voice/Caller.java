@@ -50,7 +50,8 @@ public class Caller extends JFrame {
 
 	private RecorderAudio r;
 	private PlayerAudio p;
-
+	private RunTimeCall rtc = new RunTimeCall();
+	
 	public Caller(String yourname, String yourIP) {
 		this.yourIP = yourIP;
 		initialize();
@@ -71,7 +72,7 @@ public class Caller extends JFrame {
 		this.setBounds(100, 100, 482, 336);
 		this.getContentPane().setLayout(null);
 		this.addWindowListener(new WindowAdapter() {
-			public void windowclosing(WindowEvent e) {
+			public void windowClosing(WindowEvent e) {
 				releaseMemory();
 			}
 		});
@@ -118,13 +119,12 @@ public class Caller extends JFrame {
 
 			public void actionPerformed(ActionEvent arg0) {
 				if (!agreedState) {
-					RunTimeCall rtc = new RunTimeCall();
 					playRingtone.stop();
 					agreedState = true;
 					startRecoderAudio(true);
 					startPlayerAudio(true);
 					btnCall.setVisible(false);
-					btnDeny.setLocation(70, 5);
+					btnDeny.setLocation(75, 5);
 				}
 			}
 		});
@@ -156,7 +156,6 @@ public class Caller extends JFrame {
 	// set time of calling
 	private class RunTimeCall extends Thread {
 		public RunTimeCall() {
-			start();
 		}
 
 		public void run() {
@@ -188,27 +187,32 @@ public class Caller extends JFrame {
 			playRingtone = new PlayRingtone();
 			playRingtone.start();
 		} else {
+			playRingtone.interrupt();
 			playRingtone.stop();
 		}
 	}
 
 	public void startRecoderAudio(boolean state) {
-			r = new RecorderAudio(yourIP, Config.portUDPAudio);
-			r.start();
+		btnCall.setVisible(false);
+		btnDeny.setLocation(75, 5);
+		r = new RecorderAudio(yourIP, Config.portUDPAudio);
+		r.start();
 	}
 
 	public void startPlayerAudio(boolean state) {
-			p = new PlayerAudio(Config.portUDPAudio);
-			p.start();
+		p = new PlayerAudio(Config.portUDPAudio);
+		p.start();
+		rtc.start();
 	}
 
 	public void releaseMemory() {
 		try {
-			r.closeSocket();
-			r.stop();
+			r.closeSocket();			
 			p.closeSocket();
-			p.stop();
 		} catch (Exception e) {
+		}finally {
+			r.stop();
+			p.stop();
 		}
 		dispose();
 	}
